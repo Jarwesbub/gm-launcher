@@ -12,9 +12,10 @@ public class UIControl : MonoBehaviour
     public GameObject GameButton, PlayButton;
     public Transform GameButtonsParent;
     public Image Showcase;
-    public TMP_Text gameInfo;
+    public TMP_Text currentGame, gameInfo;
     public Dictionary<string, string[]> gameDictionary;
     private FileLoader fileLoader;
+    [SerializeField] string folderName; // Folder name where games are located: "/Assets/Files/<foldername>"
     public int gameFilesCount = 0;
     public string[] imagesTest;
     public string currentName;
@@ -25,10 +26,10 @@ public class UIControl : MonoBehaviour
     private void Awake()
     {
         fileLoader = new();
-        string myFilesPath = Environment.CurrentDirectory + "/Assets/Files/";
-        gameDictionary = fileLoader.LoadAllGamesFromPath(myFilesPath);
+        //string myFilesPath = Environment.CurrentDirectory + "/Assets/Files/"+folderName;
+        gameDictionary = fileLoader.LoadAllGamesFromPath(folderName);
         Showcase.transform.gameObject.SetActive(false);
-        gameInfo.text = "";
+        currentGame.text = "";
         PlayButton.SetActive(false);
     }
 
@@ -36,18 +37,29 @@ public class UIControl : MonoBehaviour
     {
         currentGameID = id;
         bool hasImage = gameDictionary.ElementAt(id).Value[1] == "hasImage";
+
         if (hasImage)
         {
-            string path = gameDictionary.ElementAt(id).Value[0];
-            filePath = path;
-            Showcase.sprite = fileLoader.LoadNewSprite(path + ".jpg");
+            string imgPath = gameDictionary.ElementAt(id).Value[0];
+            filePath = imgPath;
+            Showcase.sprite = fileLoader.LoadNewSprite(imgPath + ".jpg");
         }
+
         Showcase.transform.gameObject.SetActive(hasImage);
 
-        if (!PlayButton.activeSelf)
+        bool hasText = gameDictionary.ElementAt(id).Value[2] == "hasText";
+
+        if (hasText)
         {
-            PlayButton.SetActive(true);
+            string txtPath = gameDictionary.ElementAt(id).Value[0] + ".txt";
+            gameInfo.text = fileLoader.LoadNewTextFile(txtPath);
         }
+        else
+        {
+            gameInfo.text = "";
+        }
+
+        if (!PlayButton.activeSelf) { PlayButton.SetActive(true);}
     }
 
     protected void CreateGameButtons()
@@ -84,7 +96,7 @@ public class UIControl : MonoBehaviour
         {
             int id = gameDictionary.Keys.ToList().IndexOf(name);
             SetCurrentGameByID(id);
-            gameInfo.text = name;
+            currentGame.text = name;
         }
     }
 }

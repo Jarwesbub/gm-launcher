@@ -4,18 +4,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class FileLoader
 {
-    public Dictionary<string, string[]> LoadAllGamesFromPath(string myFilesPath)
+    public Dictionary<string, string[]> LoadAllGamesFromPath(string myFolder)
     {
-
-        string[] images = Directory.GetFileSystemEntries(myFilesPath, "*.jpg", SearchOption.AllDirectories);
-        string[] files = Directory.GetFileSystemEntries(myFilesPath, "*.exe", SearchOption.AllDirectories);
+        string myPath = Application.streamingAssetsPath;
+        string[] images = Directory.GetFileSystemEntries(myPath + "/" + myFolder, "*.jpg", SearchOption.AllDirectories);
+        string[] executables = Directory.GetFileSystemEntries(myPath + "/" + myFolder, "*.exe", SearchOption.AllDirectories);
+        string[] texts = Directory.GetFileSystemEntries(myPath + "/" + myFolder, "*.txt", SearchOption.AllDirectories);
 
         Dictionary<string, string[]> gameList = new();
 
-        foreach (string filePath in files)
+        foreach (string filePath in executables)
         {
             Debug.Log(filePath);
 
@@ -25,18 +28,13 @@ public class FileLoader
             if (gameList.ContainsKey(name)) { continue; }
 
             string path = filePath.Substring(0, filePath.Length - 4);
+            string hasImage = null;
+            string hasText = null;
+            if (images.Contains(path + ".jpg")) hasImage = "hasImage";
+            if (texts.Contains(path + ".txt")) hasText = "hasText";
 
-            if (images.Contains(path + ".jpg"))
-            {
-                string[] info = { path, "hasImage" };
-
-                gameList.Add(name, info);
-            }
-            else
-            {
-                string[] info = { path, null };
-                gameList.Add(name, info);
-            }
+            string[] info = { path, hasImage, hasText };
+            gameList.Add(name, info);
 
         }
         
@@ -54,7 +52,7 @@ public class FileLoader
         return NewSprite;
     }
 
-    public Texture2D LoadTexture(string FilePath) // Load JPG or PNG file from file path
+    private Texture2D LoadTexture(string FilePath) // Load JPG or PNG file from file path
     {
         Texture2D Tex2D;
         byte[] FileData;
@@ -69,4 +67,9 @@ public class FileLoader
         return null;
     }
 
+    public string LoadNewTextFile(string textFilePath)
+    {
+        string text = File.ReadAllText(textFilePath);
+        return text;
+    }
 }

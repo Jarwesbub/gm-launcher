@@ -1,0 +1,3 @@
+Debut:	2005
+Platform:	Game Maker 5
+Creator:	Jarwes
